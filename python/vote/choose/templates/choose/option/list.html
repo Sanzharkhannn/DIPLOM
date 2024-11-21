@@ -1,0 +1,24 @@
+{% extends "choose/index.html" %}
+
+{% block title %}Список вариантов для голосования{% endblock %}
+
+{% block content %}
+    <h1>Доступные варианты для голосования</h1>
+
+    <section>
+        <h2>Выберите вариант:</h2>
+        <ul>
+            {% for option in options %}
+            <li>
+                <form action="{% url 'vote' option.id %}" method="POST">
+                    {% csrf_token %}
+                    <span>{{ option.name }}</span>
+                    <button type="submit">Голосовать</button>
+                </form>
+            </li>
+            {% empty %}
+            <li>Нет доступных вариантов для голосования.</li>
+            {% endfor %}
+        </ul>
+    </section>
+{% endblock %}
