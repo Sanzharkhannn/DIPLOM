@@ -1,4 +1,6 @@
 
+
+<!--
 <!DOCTYPE html>
 <html>
 <body>
@@ -10,7 +12,6 @@
 </html>
 
 
-<!--
 {% load static %}
 
 <!DOCTYPE html>
@@ -32,7 +33,7 @@
             <ul>
                 {% for option in options %}
                 <li>
-                    <form action="{% url 'choose:vote' option.id  %}" method="POST">
+                    <form action="{% url 'chooses:Poll' option.id  %}" method="POST">
                         {% csrf_token %}
                         <span>{{ option.name }}</span>
                         <button type="submit">Голосовать</button>
@@ -59,7 +60,7 @@
     </footer>
 </body>
 </html>
-
+-->
 
 
 <!--

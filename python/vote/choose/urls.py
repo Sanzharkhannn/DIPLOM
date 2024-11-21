@@ -7,4 +7,5 @@ urlpatterns = [
 #    path('', views.option_list, name='option_list'),
  #   path('<int:option_id>', views.vote, name='vote'),
     path('choose/', views.chooses, name='chooses'),
+    path('create/', views.create_poll, name='create_poll'),
 ]
