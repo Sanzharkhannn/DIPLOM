@@ -4,8 +4,8 @@ app_name = 'choose'
 
 urlpatterns = [
 # представления поста
-#    path('', views.option_list, name='option_list'),
- #   path('<int:option_id>', views.vote, name='vote'),
-    path('choose/', views.chooses, name='chooses'),
-    path('create/', views.create_poll, name='create_poll'),
+  #  path('', views.index, name='index'),
+    path('lists/', views.option_list, name='list_of_options'),
+    #path('choose/', views.chooses, name='chooses'),
+   # path('create/', views.create_poll, name='create_poll'),
 ]

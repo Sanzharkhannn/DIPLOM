@@ -7,18 +7,10 @@
 
     <section>
         <h2>Выберите вариант:</h2>
-        <ul>
-            {% for option in options %}
-            <li>
-                <form action="{% url 'chooses:vote' option.id %}" method="POST">
-                    {% csrf_token %}
-                    <span>{{ option.name }}</span>
-                    <button type="submit">Голосовать</button>
-                </form>
-            </li>
-            {% empty %}
+        {% for item in options %}
+            <li>{{ item }}</li>
+        {% empty %}
             <li>Нет доступных вариантов для голосования.</li>
-            {% endfor %}
-        </ul>
+        {% endfor %}
     </section>
 {% endblock %}

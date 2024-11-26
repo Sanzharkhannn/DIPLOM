@@ -3,6 +3,8 @@ from django.http import HttpResponse
 from django.shortcuts import render
 from .models import Option
 from django.shortcuts import get_object_or_404, redirect
+from django.template.response import TemplateResponse
+
 
 from django.contrib.auth.decorators import login_required
 from .forms import PollForm 
@@ -10,7 +12,7 @@ from .models import Option
 
 # Create your views here.
 
-
+'''
 def create_poll(request):
     if request.method == 'POST':
         poll_form = PollForm(request.POST)
@@ -29,21 +31,23 @@ def create_poll(request):
         poll_form = PollForm()
 
     return render(request, 'choose/create_poll.html', {'poll_form': poll_form})
+'''
 
 
-
-def chooses(request):
+def index(request):
     template = loader.get_template('choose/index.html')
     return HttpResponse(template.render())
 
-'''
 
 def option_list(request):
     optionLists = Option.objects.all()
+    option_dict = {
+        'options': optionLists
+    }
     return render(request,
                   'choose/option/list.html',
-                  {'options' : optionLists})
-
+                    option_dict)
+'''
 
 def vote(request, option_id):
     option = get_object_or_404(Option, id=option_id)
