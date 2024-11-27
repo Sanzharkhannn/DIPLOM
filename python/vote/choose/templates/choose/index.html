@@ -5,8 +5,12 @@
     <title>{% block title %}Default Title{% endblock %}</title>
 </head>
 <body>
+    <h1>Добро пожаловать, {{ user.username }}</h1>
+    <a href="{% url 'choose/logout' %}">Выйти</a>
+
     {% block content %}
     <p>Default content</p>
     {% endblock %}
 </body>
 </html>
+
