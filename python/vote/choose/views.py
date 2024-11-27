@@ -1,37 +1,15 @@
 from django.template import loader
 from django.http import HttpResponse
 from django.shortcuts import render
-from .models import Option
+
 from django.shortcuts import get_object_or_404, redirect
 from django.template.response import TemplateResponse
 
 
 from django.contrib.auth.decorators import login_required
-from .forms import PollForm 
-from .models import Option
+
 
 # Create your views here.
-
-'''
-def create_poll(request):
-    if request.method == 'POST':
-        poll_form = PollForm(request.POST)
-        if poll_form.is_valid():
-            poll = poll_form.save(commit=False)
-            poll.created_by = request.user
-            poll.save()
-            
-            # Добавляем опции
-            options = request.POST.getlist('options[]')
-            for option_text in options:
-                Option.objects.create(poll=poll, text=option_text)
-            
-            return redirect('poll_detail', poll_id=poll.id)
-    else:
-        poll_form = PollForm()
-
-    return render(request, 'choose/create_poll.html', {'poll_form': poll_form})
-'''
 
 
 def index(request):
@@ -47,18 +25,20 @@ def option_list(request):
     return render(request,
                   'choose/option/list.html',
                     option_dict)
-'''
 
-def vote(request, option_id):
-    option = get_object_or_404(Option, id=option_id)
-    # Логика для обработки голосования
+def create_option(request):
     if request.method == 'POST':
-        # Создание нового голосования
-        VoteOpt.objects.create(option=option, voter=request.user)
-        option.total_votes += 1
-        option.save()
-        return redirect('choose:option_list')  # Перенаправление на список вариантов
+        # Получение данных из POST-запроса
+        text = request.POST.get('text')  # Текст
 
-    return render(request, 'choose/vote.html', {'option': option})
-    
-'''
+        if text:  # Проверка на заполнение полей
+            # Создание нового объекта Option
+            Option.objects.create(text=text)
+            return redirect('option_list')  # Перенаправление на список вариантов
+        else:
+            return HttpResponse("Не все поля заполнены!", status=400)
+
+    # Если запрос GET, отобразить форму
+    return render(request, 'choose/create_option.html')
+
+
