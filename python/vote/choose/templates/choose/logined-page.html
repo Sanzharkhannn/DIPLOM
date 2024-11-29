@@ -1,0 +1,11 @@
+{% extends "choose/index.html" %}
+
+{% block title %}Успешный логин{% endblock %}
+
+
+{% block content %}
+<h1>Поздравляю</h1>
+
+<a href="{% url 'choose:create-content' %}">Создать голосования</a>
+
+{% endblock %}

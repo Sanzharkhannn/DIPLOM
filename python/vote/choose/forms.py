@@ -8,3 +8,10 @@ class CustomUserCreationForm(UserCreationForm):
     class Meta:
         model = User
         fields = ('username', 'email', 'password1', 'password2')
+
+
+class CreateContentForVote(forms.Form):
+    title = forms.CharField(label="Content title", max_length=100)
+    body = forms.CharField(widget=forms.Textarea)
+
+    
