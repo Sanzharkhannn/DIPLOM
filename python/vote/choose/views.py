@@ -103,3 +103,7 @@ def show_votes(request):
     contents = Content.objects.all()
     return render(request, 'choose/show-votes.html', {'contents': contents})
 
+
+'''
+this is commentaris
+'''
