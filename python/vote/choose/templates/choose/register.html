@@ -9,4 +9,9 @@
         {{ form.as_p }}
         <button type="submit">Зарегистрироваться</button>
     </form>
+
+    <a href="{% url 'choose:user-logout' %}">user-logout</a><br>
+    <a href="{% url 'choose:user-login' %}">user-login</a><br>
+    <a href="{% url 'choose:create-content' %}">create-content</a><br>
+    <a href="{% url 'choose:vote-page' %}">vote-page</a><br>
 {% endblock %}

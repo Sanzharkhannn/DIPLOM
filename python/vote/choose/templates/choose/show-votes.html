@@ -1,0 +1,33 @@
+{% extends "choose/index.html" %}
+
+{% block title %}Показать выборы для голосование{% endblock %}
+
+{% block content %}
+
+<h1>Все голосование</h1>
+
+<section>
+
+        <ul>
+            {% for content in contents %}
+                <li>
+                    <strong>{{ content.title }}</strong> - {{ content.body }}<br>
+                    <form action="{% url 'choose:vote-page' %}" method="post">
+                        {% csrf_token %}
+                        <input type="hidden" name="content_id" value="{{ content.id }}">
+                        <button type="submit" name="vote_type" value="up">Upvote</button>
+                        <button type="submit" name="vote_type" value="down">Downvote</button>
+                    </form>
+                </li>
+            {% endfor %}
+        </ul>
+ 
+        <a href="{% url 'choose:user-logout' %}">user-logout</a><br>
+        <a href="{% url 'choose:vote-success' %}">vote-success</a><br>
+        <a href="{% url 'choose:create-content' %}">create-content</a><br>
+        <a href="{% url 'choose:vote-page' %}">vote-page</a><br>
+        
+</section>
+
+
+{% endblock %}

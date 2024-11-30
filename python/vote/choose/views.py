@@ -1,13 +1,12 @@
 from django.template import loader # type: ignore
-from django.http import HttpResponse # type: ignore
-from django.shortcuts import render # type: ignore
+from django.http import HttpResponse, JsonResponse # type: ignore
+from django.shortcuts import render, redirect, get_object_or_404 # type: ignore
 
-from django.shortcuts import redirect # type: ignore
 from .forms import CustomUserCreationForm, CreateContentForVote
 
 from django.contrib.auth import login as auth_login, authenticate, logout as auth_logout
 from django.contrib.auth.decorators import login_required
-from .models import Content
+from .models import Content, Vote
 
 # Create your views here.
 
@@ -72,3 +71,35 @@ def create_content(request):
 
 def vote_success(request):
     return render(request, 'choose/vote_success.html', {'message': 'Content created successfully!'})
+
+
+@login_required
+def show_votes(request):
+    if request.method == 'POST':
+        content_id = request.POST.get('content_id')
+        vote_type = request.POST.get('vote_type')
+
+        # Получаем объект контента
+        content = get_object_or_404(Content, id=content_id)
+
+        # Проверяем, голосовал ли пользователь ранее за этот контент
+        existing_vote = Vote.objects.filter(voter=request.user, content=content).first()
+        if existing_vote:
+            # Если пользователь уже голосовал, обновляем голос
+            existing_vote.vote_type = vote_type
+            existing_vote.save()
+        else:
+            # Если голос первый, создаём новый
+            Vote.objects.create(voter=request.user, content=content, vote_type=vote_type)
+
+        # Возвращаем JSON-ответ, если голосование происходит через AJAX
+        if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+            return JsonResponse({'success': True, 'message': 'Vote registered!'})
+
+        # Перенаправляем на страницу голосования
+        return redirect('choose:vote-page')
+
+    # Показываем список контентов для голосования
+    contents = Content.objects.all()
+    return render(request, 'choose/show-votes.html', {'contents': contents})
+

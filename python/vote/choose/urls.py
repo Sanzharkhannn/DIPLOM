@@ -12,5 +12,5 @@ urlpatterns = [
     path('vote/', views.vote_page, name='vote-page'),
     path('vote/create', views.create_content, name='create-content'),
     path('vote-success/', views.vote_success, name='vote-success'),  # Опционально
-
+    path('vote/user/createvote', views.show_votes, name='vote-page'),
 ]
