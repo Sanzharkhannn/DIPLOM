@@ -106,4 +106,6 @@ def show_votes(request):
 
 '''
 this is commentaris
+
+added other 2 lines
 '''
