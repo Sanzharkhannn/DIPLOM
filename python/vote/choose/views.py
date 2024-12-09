@@ -3,7 +3,6 @@ from django.http import HttpResponse, JsonResponse # type: ignore
 from django.shortcuts import render, redirect, get_object_or_404 # type: ignore
 
 from .forms import CustomUserCreationForm, CreateContentForVote
-
 from django.contrib.auth import login as auth_login, authenticate, logout as auth_logout
 from django.contrib.auth.decorators import login_required
 from .models import Content, Vote
@@ -26,7 +25,7 @@ def user_register(request):
             return redirect('choose:index')  # Перенаправляем на главную страницу
     else:
         form = CustomUserCreationForm()  # Пустая форма для отображения
-    return render(request, 'choose/register.html', {'form': form})
+        return render(request, 'choose/register.html', {'form': form})
 
 # Функция логина
 def user_login(request):  # Переименована функция для предотвращения рекурсии
