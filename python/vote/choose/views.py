@@ -21,7 +21,6 @@ def user_register(request):
         form = CustomUserCreationForm(request.POST)
         if form.is_valid():
             user = form.save()  # Создаём пользователя
-<<<<<<< HEAD
             # Автоматически логиним после регистрации
             auth_login(request, user)
             # Перенаправляем на главную страницу
@@ -29,13 +28,6 @@ def user_register(request):
     else:
         form = CustomUserCreationForm()  # Пустая форма для отображения
     return render(request, "choose/register.html", {"form": form})
-=======
-            auth_login(request, user)  # Автоматически логиним после регистрации
-            return redirect("choose:index")  # Перенаправляем на главную страницу
-    else:
-        form = CustomUserCreationForm()  # Пустая форма для отображения
-        return render(request, "choose/register.html", {"form": form})
->>>>>>> afbe4556df033a0e297fb3e288d9da8bec0c6c0e
 
 
 # Функция логина
@@ -48,12 +40,8 @@ def user_login(request):  # Переименована функция для п�
         user = authenticate(request, username=username, password=password)
         if user is not None:
             auth_login(request, user)  # Логиним пользователя
-<<<<<<< HEAD
             # Перенаправляем на главную страницу
             return redirect("choose:logined-page")
-=======
-            return redirect("choose:logined-page")  # Перенаправляем на главную страницу
->>>>>>> afbe4556df033a0e297fb3e288d9da8bec0c6c0e
         else:
             return render(
                 request, "choose/login.html", {"error": "Неверный логин или пароль"}
@@ -90,12 +78,8 @@ def create_content(request):
         # Перенаправляем на страницу успеха или обратно на голосование
         return redirect("choose:vote-success")  # Укажите реальный URL
 
-<<<<<<< HEAD
     # Возвращаем форму для создания контента
     return render(request, "choose/vote.html")
-=======
-    return render(request, "choose/vote.html")  # Возвращаем форму для создания контента
->>>>>>> afbe4556df033a0e297fb3e288d9da8bec0c6c0e
 
 
 def vote_success(request):
@@ -104,15 +88,12 @@ def vote_success(request):
         "choose/vote_success.html",
         {"message": "Content created successfully!"},
     )
-<<<<<<< HEAD
 
 
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
 from .models import Content, Vote
-=======
->>>>>>> afbe4556df033a0e297fb3e288d9da8bec0c6c0e
 
 
 @login_required
@@ -163,7 +144,6 @@ def show_votes(request):
     return render(request, "choose/show-votes.html", {"contents": contents})
 
 
-<<<<<<< HEAD
 # @login_required
 # def show_percent(request):
 
@@ -172,10 +152,3 @@ def show_votes(request):
 
 # added other 2 lines
 # '''
-=======
-"""
-this is commentaris
-
-added other 2 lines
-"""
->>>>>>> afbe4556df033a0e297fb3e288d9da8bec0c6c0e
