@@ -90,11 +90,6 @@ def vote_success(request):
     )
 
 
-from django.shortcuts import render, redirect, get_object_or_404
-from django.http import JsonResponse
-from django.contrib.auth.decorators import login_required
-from .models import Content, Vote
-
 
 @login_required
 def show_votes(request):
@@ -144,11 +139,3 @@ def show_votes(request):
     return render(request, "choose/show-votes.html", {"contents": contents})
 
 
-# @login_required
-# def show_percent(request):
-
-# '''
-# this is commentaris
-
-# added other 2 lines
-# '''

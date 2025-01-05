@@ -4,34 +4,43 @@
 
 {% block content %}
 
-<h1>Все голосование</h1>
+<h1 class="text-center">Все голосование</h1>
 
 <section>
 
-    <ul>
-        {% for content in contents %}
-        <li>
-            <strong>{{ content.title }}</strong> - {{ content.body }}<br>
-            <form action="{% url 'choose:vote-page' %}" method="post">
-                {% csrf_token %}
-                <input type="hidden" name="content_id" value="{{ content.id }}">
-                <button type="submit" name="vote_type" value="up">Upvote</button>
-                <button type="submit" name="vote_type" value="down">Downvote</button>
-            </form>
-        </li>
-        <li>Up votes: {{ content.up_percent }}%</li>
-        <li>Down votes: {{ content.down_percent }}%</li>
-<<<<<<< HEAD
-=======
-        <li>Total votes: {{ content.total_votes }}</li>
->>>>>>> afbe4556df033a0e297fb3e288d9da8bec0c6c0e
-        {% endfor %}
-    </ul>
 
-    <a href="{% url 'choose:user-logout' %}">user-logout</a><br>
-    <a href="{% url 'choose:vote-success' %}">vote-success</a><br>
-    <a href="{% url 'choose:create-content' %}">create-content</a><br>
-    <a href="{% url 'choose:vote-page' %}">vote-page</a><br>
+    <div class="d-flex flex-wrap justify-content-around">
+        {% for content in contents %}
+        <div class="w-25">
+            <div class="list-group">
+                <div class="list-group-item list-group-item-action flex-column align-items-start">
+                    <div class="d-flex w-100 justify-content-between">
+                        <h5 class="mb-1">Имя контента: {{ content.title }}</h5>
+                        <!-- <small>Как долго создан</small> -->
+                    </div>
+
+                    <!-- <p class="mb-1">Donec id elit non mi porta gravida at eget metus. Maecenas sed diam eget risus varius
+                    blandit.</p> -->
+                    <p>Описания контента: {{ content.body }}</p>
+
+                    <p class="mb-1">Up votes: {{ content.up_percent }}%</p>
+                    <p class="mb-1">Down votes: {{ content.down_percent }}%</p>
+                    <p class="mb-1">Total votes: {{ content.total_votes }}</p>
+                    <!-- <small>Donec id elit non mi porta.</small> -->
+                </div>
+                <p>
+                    <!-- <strong>{{ content.title }}</strong> - {{ content.body }}<br> -->
+                <form action="{% url 'choose:vote-page' %}" method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="content_id" value="{{ content.id }}">
+                    <button type="submit" name="vote_type" class="btn border btn-primary" value="up">Upvote</button>
+                    <button type="submit" name="vote_type" class="btn border btn-primary" value="down">Downvote</button>
+                </form>
+                </p>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
 
 </section>
 

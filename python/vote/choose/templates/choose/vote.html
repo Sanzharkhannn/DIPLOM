@@ -3,22 +3,23 @@
 {% block title %}Выборы для голосования{% endblock %}
 
 {% block content %}
-    <h1>Создать голосования</h1>
 
-    <section>
-        <h2>Голосование</h2>
-        <form action="{% url 'choose:create-content' %}" method="post">
-            {% csrf_token %}
-            <label for="title">Content Title:</label><br>
-            <input type="text" id="title" name="title" required><br><br>
-    
-            <label for="body">Content Description:</label><br>
-            <textarea id="body" name="body" rows="4" required></textarea><br><br>
-    
-            <button type="submit">Create</button>
-        </form>
-    </section>
+<section>
+    <h2 class="text-center">Голосование</h2>
+    <div class="container w-25">
+        <!-- <div class="row "> -->
+            <form action="{% url 'choose:create-content' %}" class="row align-items-center" method="post">
+                {% csrf_token %}
+                <label for="title">Content Title:</label><br>
+                <input type="text" id="title" name="title" required><br><br>
 
-    <a href="{% url 'choose:vote-page' %}">Все выборы</a>
+                <label for="body">Content Description:</label><br>
+                <textarea id="body" name="body" rows="4" required></textarea><br><br>
+
+                <button type="submit" class="btn my-2 py-2 border btn-primary">Create</button>
+            </form>
+        <!-- </div> -->
+    </div>
+</section>
 
 {% endblock %}

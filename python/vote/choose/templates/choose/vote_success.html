@@ -1,12 +1,14 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Success</title>
-</head>
-<body>
-    <h1>{{ message }}</h1>
-    <a href="{% url 'choose:create-content' %}">Create More Content</a>
-</body>
-</html>
+{% extends "choose/index.html" %}
+
+{% block title %}Показать выборы для голосование{% endblock %}
+
+{% block content %}
+
+<h1>{{ message }}</h1>
+<a href="{% url 'choose:create-content' %}">Create More Content</a>
+<br>
+<a href="{% url 'choose:vote-page' %}">Votes pages</a>
+<br>
+<a href="{% url 'choose:index' %}">Index</a>
+<br>
+{% endblock %}
