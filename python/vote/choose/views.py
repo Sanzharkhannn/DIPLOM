@@ -3,9 +3,13 @@ from django.http import HttpResponse, JsonResponse  # type: ignore
 from django.shortcuts import render, redirect, get_object_or_404  # type: ignore
 
 from .forms import CustomUserCreationForm, CreateContentForVote
-from django.contrib.auth import login as auth_login, authenticate, logout as auth_logout
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth import login as auth_login, authenticate, logout as auth_logout  # type: ignore
+from django.contrib.auth.decorators import login_required  # type: ignore
 from .models import Content, Vote
+import matplotlib.pyplot as plt
+import matplotlib
+import io
+import base64
 
 # Create your views here.
 
@@ -44,7 +48,8 @@ def user_login(request):  # Переименована функция для п�
             return redirect("choose:logined-page")
         else:
             return render(
-                request, "choose/login.html", {"error": "Неверный логин или пароль"}
+                request, "choose/login.html", {
+                    "error": "Неверный логин или пароль"}
             )
     return render(request, "choose/login.html")  # Отображаем форму логина
 
@@ -90,6 +95,8 @@ def vote_success(request):
     )
 
 
+matplotlib.use('Agg')
+
 
 @login_required
 def show_votes(request):
@@ -101,7 +108,8 @@ def show_votes(request):
         content = get_object_or_404(Content, id=content_id)
 
         # Проверяем, голосовал ли пользователь ранее за этот контент
-        existing_vote = Vote.objects.filter(voter=request.user, content=content).first()
+        existing_vote = Vote.objects.filter(
+            voter=request.user, content=content).first()
         if existing_vote:
             # Если пользователь уже голосовал, обновляем голос
             existing_vote.vote_type = vote_type
@@ -128,14 +136,114 @@ def show_votes(request):
         down_count = votes.filter(vote_type="down").count()
         total_votes = up_count + down_count
 
-        # Добавляем динамические атрибуты к каждому объекту content
-        content.up_percent = (100 * up_count) / total_votes if total_votes > 0 else 0
-        content.down_percent = (
-            (100 * down_count) / total_votes if total_votes > 0 else 0
-        )
+        content.up_percent = (100 * up_count) / \
+            total_votes if total_votes > 0 else 0
+        content.down_percent = (100 * down_count) / \
+            total_votes if total_votes > 0 else 0
         content.total_votes = total_votes
 
-    # Передаём данные в шаблон
+        # Построение диаграммы
+        # if total_votes > 0:
+        #     labels = ['Up Votes', 'Down Votes']
+        #     sizes = [content.up_percent, content.down_percent]
+        #     colors = ['#4CAF50', '#F44336']
+
+        #     fig, ax = plt.subplots()
+        # ax.pie(sizes, labels=labels, colors=colors,
+        #        autopct='%1.1f%%', startangle=90)
+        # # Equal aspect ratio ensures that pie is drawn as a circle.
+        # ax.axis('equal')
+        # plt.title(f"{content.title} - {total_votes} Votes")
+
+        # # Сохранение диаграммы в буфер
+        # buf = io.BytesIO()
+        # plt.savefig(buf, format='png')
+        # buf.seek(0)
+        # image_base64 = base64.b64encode(buf.read()).decode('utf-8')
+        # buf.close()
+        # plt.close(fig)
+
+        # # Сохраняем диаграмму как атрибут объекта
+        # content.chart_image = f"data:image/png;base64,{image_base64}"
+
+        if total_votes > 0:
+            labels = ['Up Votes', 'Down Votes']
+            sizes = [content.up_percent, content.down_percent]
+            colors = ['#4CAF50', '#F44336']
+
+            fig, ax = plt.subplots()
+            ax.bar(labels, sizes, color=colors, width=0.6)
+
+    # Добавляем подписи процентов над столбцами
+            for i, v in enumerate(sizes):
+                ax.text(i, v + 2, f"{v:.1f}%", ha='center', fontsize=10)
+
+    # Устанавливаем заголовок и подписи осей
+            ax.set_title(
+                f"{content.title} - {total_votes} Votes", fontsize=14)
+            ax.set_xlabel("Vote Type", fontsize=12)
+            ax.set_ylabel("Percentage(%)", fontsize=12)
+
+            # Устанавливаем диапазон для оси Y
+            ax.set_ylim(0, 100)
+
+            # Сохранение диаграммы в буфер
+            buf = io.BytesIO()
+            plt.savefig(buf, format='png')
+            buf.seek(0)
+            image_base64 = base64.b64encode(buf.read()).decode('utf-8')
+            buf.close()
+            plt.close(fig)
+
+            content.chart_image = f"data:image/png;base64,{image_base64}"
+        else:
+            content.chart_image = None
+
     return render(request, "choose/show-votes.html", {"contents": contents})
 
+# @login_required
+# def show_votes(request):
+#     if request.method == "POST":
+#         content_id = request.POST.get("content_id")
+#         vote_type = request.POST.get("vote_type")
 
+#         # Получаем объект контента
+#         content = get_object_or_404(Content, id=content_id)
+
+#         # Проверяем, голосовал ли пользователь ранее за этот контент
+#         existing_vote = Vote.objects.filter(voter=request.user, content=content).first()
+#         if existing_vote:
+#             # Если пользователь уже голосовал, обновляем голос
+#             existing_vote.vote_type = vote_type
+#             existing_vote.save()
+#         else:
+#             # Если голос первый, создаём новый
+#             Vote.objects.create(
+#                 voter=request.user, content=content, vote_type=vote_type
+#             )
+
+#         # Возвращаем JSON-ответ, если голосование происходит через AJAX
+#         if request.headers.get("x-requested-with") == "XMLHttpRequest":
+#             return JsonResponse({"success": True, "message": "Vote registered!"})
+
+#         # Перенаправляем на страницу голосования
+#         return redirect("choose:vote-page")
+
+#     # Считаем голоса для каждого контента и добавляем проценты как атрибуты
+#     contents = Content.objects.all()
+
+#     for content in contents:
+#         votes = Vote.objects.filter(content=content)
+#         up_count = votes.filter(vote_type="up").count()
+#         down_count = votes.filter(vote_type="down").count()
+#         total_votes = up_count + down_count
+
+#         # Добавляем динамические атрибуты к каждому объекту content
+#         content.up_percent = (100 * up_count) / total_votes if total_votes > 0 else 0
+#         content.down_percent = (
+#             (100 * down_count) / total_votes if total_votes > 0 else 0
+#         )
+#         content.total_votes = total_votes
+
+#     # Передаём данные в шаблон
+#     return render(request, "choose/show-votes.html", {"contents": contents})
