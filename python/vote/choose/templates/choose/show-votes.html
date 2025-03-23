@@ -4,7 +4,7 @@
 
 {% block content %}
 
-<h1 class="text-center">Все голосование</h1>
+<h1 class="text-center">Все лайки</h1>
 
 <section>
 
@@ -29,8 +29,8 @@
                         <form action="{% url 'choose:vote-page' %}" method="post">
                             {% csrf_token %}
                             <input type="hidden" name="content_id" value="{{ content.id }}">
-                            <button type="submit" name="vote_type" class="btn btn-success" value="up">Upvote</button>
-                            <button type="submit" name="vote_type" class="btn btn-danger" value="down">Downvote</button>
+                            <button type="submit" name="vote_type" class="btn btn-success" value="up">За голосование</button>
+                            <button type="submit" name="vote_type" class="btn btn-danger" value="down">Против голосование</button>
                         </form>
                     </div>
                 </div>
@@ -77,6 +77,7 @@
     </div>
 -->
 
+<a href="{% url 'choose:vote-list' %}">голосовать</a>
 </section>
 
 

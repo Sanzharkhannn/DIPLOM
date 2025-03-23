@@ -1,7 +1,7 @@
-from django.db import models # type: ignore
-from django.contrib.auth.models import User # type: ignore
-from django.contrib.auth.forms import UserCreationForm # type: ignore
-from django import forms # type: ignore
+from django.db import models  # type: ignore
+from django.contrib.auth.models import User  # type: ignore
+from django.contrib.auth.forms import UserCreationForm  # type: ignore
+from django import forms  # type: ignore
 
 
 class RegistrationForm(UserCreationForm):
@@ -11,36 +11,58 @@ class RegistrationForm(UserCreationForm):
         model = User
         fields = ('username', 'email', 'password1', 'password2')
 
-
 class Content(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='user_contents')
     title = models.CharField(max_length=200)
     body = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
-    TYPE_OF_SELECTING_CHOICES = (
-        ('SCR', 'Soccer'),
-        ('MV', 'Movie'),
-        ('HMN', 'Human'),)
+    start_date = models.DateField(null=True, blank=True)
+    end_date = models.DateField(null=True, blank=True)
+
+    def __str__(self):
+        return self.title
+
+class ContentOption(models.Model):
+    content = models.ForeignKey(Content, on_delete=models.CASCADE, related_name='options')
+    option_text = models.CharField(max_length=200)
+
+    def __str__(self):
+        return f"Option: {self.option_text} (for {self.content.title})"
+
+# ✅ Голоса за варианты
+class ContentOptionVote(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    option = models.ForeignKey(ContentOption, on_delete=models.CASCADE, related_name='votes')
+    voted_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('user', 'option')  # Чтобы пользователь не мог голосовать дважды за один вариант
+
+    def __str__(self):
+        return f"{self.user.username} проголосовал за {self.option.option_text}"
 
 
+# ✅ Оставляем твой класс Vote для лайков/дизлайков
 class Vote(models.Model):
-   VOTE_TYPE_CHOICES = (
+    VOTE_TYPE_CHOICES = (
         ('up', 'Upvote'),
-        ('down', 'Downvote'),)
-   
-   voter = models.ForeignKey(User, on_delete=models.CASCADE, related_name='votes')  # Кто голосует
-   content = models.ForeignKey(Content, on_delete=models.CASCADE, null=True, blank=True, related_name='votes')  # За контент
-   target_user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True, related_name='received_votes')  # За пользователя
-   vote_type = models.CharField(max_length=10, choices=VOTE_TYPE_CHOICES)
-   created_at = models.DateTimeField(auto_now_add=True)
+        ('down', 'Downvote'),
+    )
 
-   def __str__(self):
-       if self.content:
-           return f"{self.voter} voted {self.vote_type} on content {self.content}"
-       return f"{self.voter} voted {self.vote_type} for user {self.target_user}"
+    voter = models.ForeignKey(User, on_delete=models.CASCADE, related_name='votes')
+    content = models.ForeignKey(Content, on_delete=models.CASCADE, null=True, blank=True, related_name='votes')
+    target_user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True, related_name='received_votes')
+    vote_type = models.CharField(max_length=10, choices=VOTE_TYPE_CHOICES)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        if self.content:
+            return f"{self.voter} {self.vote_type} for content {self.content}"
+        return f"{self.voter} {self.vote_type} for user {self.target_user}"
 
 
+# RSA для безопасности, оставляем без изменений
 class UserRSAKeys(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     public_key = models.TextField()
-    private_key_encrypted = models.TextField()  # или просто private_key, если без шифрования (но лучше зашифровать)
+    private_key_encrypted = models.TextField()  # Лучше хранить зашифрованным

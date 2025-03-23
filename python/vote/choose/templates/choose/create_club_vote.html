@@ -6,7 +6,8 @@
 
 <h2 class="text-center mb-4">Создать голосование</h2>
 
-<form action="" method="post" class="row g-3">
+<form action="{% url 'choose:create-poll' %}" method="post" class="row g-3">
+
     {% csrf_token %}
     
     <div class="col-12">

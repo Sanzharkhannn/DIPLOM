@@ -22,4 +22,8 @@ urlpatterns = [
     path('create-actor-vote/', views.create_actor_vote, name='create-actor-vote'),
     path('create-profession-vote/', views.create_profession_vote, name='create-profession-vote'),
     path('create-famous-vote/', views.create_famous_vote, name='create-famous-vote'),
+    path('create_poll/', views.create_poll, name='create-poll'),
+    path('vote_list/', views.vote_list, name='vote-list'),
+    path('polls/', views.polls_list, name='polls_list'),
+    path('polls/<int:poll_id>/', views.poll_detail, name='poll_detail'),
 ]

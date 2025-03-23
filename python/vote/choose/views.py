@@ -5,13 +5,15 @@ from django.shortcuts import render, redirect, get_object_or_404  # type: ignore
 from .forms import CustomUserCreationForm, CreateContentForVote
 from django.contrib.auth import login as auth_login, authenticate, logout as auth_logout  # type: ignore
 from django.contrib.auth.decorators import login_required  # type: ignore
-from .models import Content, Vote
+from .models import Content, Vote,  ContentOption, ContentOptionVote
 import matplotlib.pyplot as plt
 import matplotlib
 import io
 import base64
 from django.contrib import messages
+from .models import Content
 # Create your views here.
+
 
 
 def index(request):
@@ -280,3 +282,93 @@ def create_profession_vote(request):
 
 def create_famous_vote(request):
     return render(request, 'choose/create_famous_vote.html')
+
+
+
+from django.shortcuts import render, redirect
+from django.contrib import messages
+from .models import Content, ContentOption
+from django.utils import timezone
+
+
+@login_required
+def create_poll(request):
+    if request.method == 'POST':
+        vote_title = request.POST.get('vote_title')
+        vote_description = request.POST.get('vote_description')
+        start_date = request.POST.get('start_date')
+        end_date = request.POST.get('end_date')
+        options = request.POST.getlist('vote_options')  # Получаем список всех вариантов
+        
+        # Создаём запись Content
+        content = Content.objects.create(
+            user=request.user,
+            title=vote_title,
+            body=vote_description,
+            start_date=start_date,
+            end_date=end_date,
+            created_at=timezone.now()
+        )
+        
+        # Сохраняем варианты
+        for option in options:
+            if option.strip():
+                ContentOption.objects.create(content=content, option_text=option.strip())
+        
+        return redirect('choose:vote-list')  # Перенаправляем на страницу списка голосований
+    
+    return render(request, 'choose/create_poll.html')
+
+
+def vote_list(request):
+    polls = Content.objects.all().order_by('-created_at')
+    return render(request, "choose/vote_list.html", {"polls": polls})
+
+
+# @login_required
+# def poll_detail(request, poll_id):
+#     poll = get_object_or_404(Content, id=poll_id)
+#     if request.method == 'POST':
+#         option_id = request.POST.get('option')
+#         if option_id:
+#             option = get_object_or_404(ContentOption, id=option_id)
+#             # Проверяем, голосовал ли уже пользователь
+#             existing_vote = ContentOptionVote.objects.filter(user=request.user, option__content=poll).first()
+#             if not existing_vote:
+#                 ContentOptionVote.objects.create(user=request.user, option=option)
+#             return redirect('choose:polls_list')  # или куда-то ещё
+#     return render(request, 'choose/poll_detail.html', {'poll': poll})
+
+
+@login_required
+def poll_detail(request, poll_id):
+    poll = get_object_or_404(Content, id=poll_id)
+    options = ContentOption.objects.filter(content=poll)
+    
+    if request.method == 'POST':
+        selected_option_id = request.POST.get('option')
+        if selected_option_id:
+            selected_option = ContentOption.objects.get(id=selected_option_id)
+
+            # Проверяем, голосовал ли пользователь ранее
+            existing_vote = ContentOptionVote.objects.filter(user=request.user, option__content_id=poll_id).first()
+            if existing_vote:
+                # Изменяем существующий голос
+                existing_vote.option = selected_option
+                existing_vote.save()
+                messages.success(request, "Ваш голос был обновлен!")
+            else:
+                # Если не голосовал ранее — создаём новый голос
+                ContentOptionVote.objects.create(user=request.user, option=selected_option)
+                messages.success(request, "Спасибо за ваш голос!")
+
+            return redirect('choose:poll_detail', poll_id=poll_id)
+        else:
+            messages.error(request, "Вы не выбрали вариант ответа.")
+
+    return render(request, 'choose/poll_detail.html', {'poll': poll, 'options': options})
+
+
+def polls_list(request):
+    polls = Content.objects.all()
+    return render(request, 'choose/polls_list.html', {'polls': polls})

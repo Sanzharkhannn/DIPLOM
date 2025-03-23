@@ -1,0 +1,33 @@
+{% extends 'choose/index.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Список созданных голосований</h2>
+    <ul class="list-group mt-3">
+        {% for poll in polls %}
+        <li class="list-group-item">
+            <h5>{{ poll.title }}</h5>
+            <p>{{ poll.body }}</p>
+            <p>Автор: {{ poll.user.username }}</p>
+            <p>Дата начала: {{ poll.start_date }} | Дата окончания: {{ poll.end_date }}</p>
+            
+            <strong>Варианты ответов:</strong>
+            <ul>
+                {% for option in poll.options.all %}
+                <li>
+                    {{ option.option_text }} — 
+                    <strong>{{ option.votes.count }} голос(ов)</strong>
+                </li>
+                {% empty %}
+                <li>Нет вариантов.</li>
+                {% endfor %}
+            </ul>
+            
+            <a href="{% url 'choose:poll_detail' poll.id %}" class="btn btn-primary btn-sm">Перейти к голосованию</a>
+        </li>
+        {% empty %}
+        <li class="list-group-item">Пока нет созданных голосований.</li>
+        {% endfor %}
+    </ul>
+</div>
+{% endblock %}

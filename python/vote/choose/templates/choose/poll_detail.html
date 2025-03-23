@@ -1,0 +1,20 @@
+{% extends 'choose/index.html' %}
+{% block content %}
+<div class="container mt-4">
+    <h2>{{ poll.title }}</h2>
+    <p>{{ poll.body }}</p>
+
+    <form method="post">
+        {% csrf_token %}
+        {% for option in poll.options.all %}
+            <div class="form-check">
+                <input class="form-check-input" type="radio" name="option" id="option{{ option.id }}" value="{{ option.id }}" required>
+                <label class="form-check-label" for="option{{ option.id }}">
+                    {{ option.option_text }} ({{ option.votes.count }} голосов)
+                </label>
+            </div>
+        {% endfor %}
+        <button type="submit" class="btn btn-primary mt-3">Проголосовать</button>
+    </form>
+</div>
+{% endblock %}
