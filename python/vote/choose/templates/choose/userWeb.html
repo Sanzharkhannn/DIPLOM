@@ -1,0 +1,22 @@
+{% extends "choose/index.html" %}
+
+{% block title %}Страница пользователя{% endblock %}
+
+{% block content %}
+
+
+
+<h1 class="text-center">Добро пожаловать, {{ user.username }}!</h1>
+
+<h2 class="text-center">
+    <a class="nav-link" href="{% url 'choose:user-logout' %}">Выход</a>
+</h2>
+
+{% if messages %}
+  {% for message in messages %}
+    <div class="alert alert-info">{{ message }}</div>
+  {% endfor %}
+{% endif %}
+
+
+{% endblock %}

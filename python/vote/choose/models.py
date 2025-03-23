@@ -17,6 +17,10 @@ class Content(models.Model):
     title = models.CharField(max_length=200)
     body = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
+    TYPE_OF_SELECTING_CHOICES = (
+        ('SCR', 'Soccer'),
+        ('MV', 'Movie'),
+        ('HMN', 'Human'),)
 
 
 class Vote(models.Model):
@@ -35,3 +39,8 @@ class Vote(models.Model):
            return f"{self.voter} voted {self.vote_type} on content {self.content}"
        return f"{self.voter} voted {self.vote_type} for user {self.target_user}"
 
+
+class UserRSAKeys(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    public_key = models.TextField()
+    private_key_encrypted = models.TextField()  # или просто private_key, если без шифрования (но лучше зашифровать)

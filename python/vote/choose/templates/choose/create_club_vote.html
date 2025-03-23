@@ -1,0 +1,74 @@
+{% extends "choose/index.html" %}
+
+{% block title %}Список вариантов для голосования{% endblock %}
+
+{% block content %}
+
+<h2 class="text-center mb-4">Создать голосование</h2>
+
+<form action="" method="post" class="row g-3">
+    {% csrf_token %}
+    
+    <div class="col-12">
+        <label for="voteTitle" class="form-label">Название голосования</label>
+        <input type="text" class="form-control" id="voteTitle" name="vote_title" placeholder="Введите название" required>
+    </div>
+
+    <div class="col-12">
+        <label for="voteDescription" class="form-label">Описание</label>
+        <textarea class="form-control" id="voteDescription" name="vote_description" rows="3" placeholder="Опишите голосование" required></textarea>
+    </div>
+
+    <div class="col-12">
+        <label class="form-label">Варианты ответа:</label>
+        <div id="options-container">
+            <div class="input-group mb-2">
+                <input type="text" class="form-control" name="vote_options" placeholder="Вариант 1" required>
+                <button class="btn btn-danger remove-option-btn" type="button">Удалить</button>
+            </div>
+        </div>
+        <button type="button" class="btn btn-success mt-2" id="add-option-btn">Добавить вариант</button>
+    </div>
+
+    <div class="col-md-6">
+        <label for="startDate" class="form-label">Дата начала</label>
+        <input type="date" class="form-control" id="startDate" name="start_date" required>
+    </div>
+
+    <div class="col-md-6">
+        <label for="endDate" class="form-label">Дата окончания</label>
+        <input type="date" class="form-control" id="endDate" name="end_date" required>
+    </div>
+
+    <div class="col-12 text-center">
+        <button type="submit" class="btn btn-primary px-5">Создать голосование</button>
+    </div>
+</form>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const addOptionBtn = document.getElementById('add-option-btn');
+        const optionsContainer = document.getElementById('options-container');
+
+        addOptionBtn.addEventListener('click', function () {
+            const optionCount = optionsContainer.children.length + 1;
+            const optionField = document.createElement('div');
+            optionField.classList.add('input-group', 'mb-2');
+            optionField.innerHTML = `
+                <input type="text" class="form-control" name="vote_options" placeholder="Вариант ${optionCount}" required>
+                <button class="btn btn-danger remove-option-btn" type="button">Удалить</button>
+            `;
+            optionsContainer.appendChild(optionField);
+        });
+
+        optionsContainer.addEventListener('click', function (e) {
+            if (e.target.classList.contains('remove-option-btn')) {
+                e.target.parentElement.remove();
+            }
+        });
+    });
+</script>
+
+
+
+{% endblock %}

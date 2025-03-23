@@ -10,17 +10,19 @@ import matplotlib.pyplot as plt
 import matplotlib
 import io
 import base64
-
+from django.contrib import messages
 # Create your views here.
 
 
 def index(request):
-    template = loader.get_template("choose/index.html")
-    return HttpResponse(template.render())
-
+    return render(request, "choose/index.html")
 
 # Функция регистрации
 def user_register(request):
+    if request.user.is_authenticated:
+        messages.info(request, "Вы уже вошли в систему.")
+        return redirect('choose:user-page')
+
     if request.method == "POST":
         form = CustomUserCreationForm(request.POST)
         if form.is_valid():
@@ -37,22 +39,23 @@ def user_register(request):
 # Функция логина
 
 
-def user_login(request):  # Переименована функция для предотвращения рекурсии
+def user_login(request):
+    if request.user.is_authenticated:
+        messages.info(request, "Вы уже вошли в систему.")
+        return redirect('choose:user-page')  # Укажи правильное имя главной страницы
+
     if request.method == "POST":
-        username = request.POST["username"]
-        password = request.POST["password"]
+        username = request.POST.get("username")
+        password = request.POST.get("password")
         user = authenticate(request, username=username, password=password)
         if user is not None:
-            auth_login(request, user)  # Логиним пользователя
-            # Перенаправляем на главную страницу
-            return redirect("choose:logined-page")
+            auth_login(request, user)
+            return redirect("choose:logined-page")  # Укажи правильный URL namespace
         else:
-            return render(
-                request, "choose/login.html", {
-                    "error": "Неверный логин или пароль"}
-            )
-    return render(request, "choose/login.html")  # Отображаем форму логина
+            messages.error(request, "Неверный логин или пароль")
+            return render(request, "choose/login.html")
 
+    return render(request, "choose/login.html")
 
 @login_required
 def logined_page(request):
@@ -71,20 +74,23 @@ def vote_page(request):
     return render(request, "choose/vote.html")
 
 
-@login_required  # Убедитесь, что пользователь авторизован
+ # Убедитесь, что пользователь авторизован
 def create_content(request):
-    if request.method == "POST":
-        title = request.POST.get("title")  # Получаем данные из формы
-        body = request.POST.get("body")  # Добавляем поле body
+    if request.user.is_authenticated:
+        if request.method == "POST":
+            title = request.POST.get("title")  # Получаем данные из формы
+            body = request.POST.get("body")  # Добавляем поле body
 
-        # Создаем новый объект Content
-        Content.objects.create(user=request.user, title=title, body=body)
+            # Создаем новый объект Content
+            Content.objects.create(user=request.user, title=title, body=body)
 
-        # Перенаправляем на страницу успеха или обратно на голосование
-        return redirect("choose:vote-success")  # Укажите реальный URL
+            # Перенаправляем на страницу успеха или обратно на голосование
+            return redirect("choose:vote-success")  # Укажите реальный URL
 
-    # Возвращаем форму для создания контента
-    return render(request, "choose/vote.html")
+        # Возвращаем форму для создания контента
+        return render(request, "choose/vote.html")
+    else:
+        return redirect("choose:user-register") 
 
 
 def vote_success(request):
@@ -247,3 +253,30 @@ def show_votes(request):
 
 #     # Передаём данные в шаблон
 #     return render(request, "choose/show-votes.html", {"contents": contents})
+
+
+def userPage(request):
+    return render(request, "choose/userWeb.html")
+
+
+
+def worldPage(request):
+    return render(request, "choose/world.html")
+
+def create_club_vote(request):
+    return render(request, 'choose/create_club_vote.html')
+
+def create_player_vote(request):
+    return render(request, 'choose/create_player_vote.html')
+
+def create_movie_vote(request):
+    return render(request, 'choose/create_movie_vote.html')
+
+def create_actor_vote(request):
+    return render(request, 'choose/create_actor_vote.html')
+
+def create_profession_vote(request):
+    return render(request, 'choose/create_profession_vote.html')
+
+def create_famous_vote(request):
+    return render(request, 'choose/create_famous_vote.html')
