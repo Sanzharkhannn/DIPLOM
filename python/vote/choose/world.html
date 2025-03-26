@@ -4,58 +4,14 @@
 
 {% block content %}
 
-{% load static %}
-
-<div class="container mt-5 text-center">
-    <h1 class="display-4 fw-bold">Добро пожаловать на платформу онлайн-голосования!</h1>
-    <p class="lead">Голосуйте легко,, безопасно и прозрачно.</p>
-</div>
-
-<style>
-    .card-img-top {
-        height: 200px;
-        object-fit: cover;
-    }
-</style>
-
-<div class="container mt-4">
-    <div class="row">
-        <div class="col-md-4">
-            <div class="card h-100 shadow-lg border-0 rounded-lg text-center">
-                <img src="{% static 'images/polls.png' %}" class="card-img-top" alt="Создавайте Опросы">
-                <div class="card-body">
-                    <h5 class="card-title mt-3">Создавайте Опросы</h5>
-                    <p class="card-text">Запускайте голосования для любых целей.</p>
-                    <a href="#" class="btn btn-primary">Создать</a>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-4">
-            <div class="card h-100 shadow-lg border-0 rounded-lg text-center">
-                <img src="{% static 'images/vote.png' %}" class="card-img-top" alt="Голосуйте Безопасно">
-                <div class="card-body">
-                    <h5 class="card-title mt-3">Голосуйте Безопасно</h5>
-                    <p class="card-text">Каждый голос защищен шифрованием.</p>
-                    <a href="#" class="btn btn-success">Голосовать</a>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-4">
-            <div class="card h-100 shadow-lg border-0 rounded-lg text-center">
-                <img src="{% static 'images/results.png' %}" class="card-img-top" alt="Результаты В Реальном Времени">
-                <div class="card-body">
-                    <h5 class="card-title mt-3">Результаты в Реальном Времени</h5>
-                    <p class="card-text">Следите за ходом голосования.</p>
-                    <a href="#" class="btn btn-warning">Посмотреть</a>
-                </div>
-            </div>
-        </div>
+<div class="p-4 p-md-5 mb-4 rounded text-body-emphasis bg-body-secondary">
+    <div class="col-lg-6 px-0">
+        <h1 class="display-4 fst-italic"> of a longer featured blog post</h1>
+        <p class="lead my-3">Multiple lines of text that form the lede, informing new readers quickly and
+            efficiently about what’s most interesting in this post’s contents.</p>
+        <p class="lead mb-0"><a href="#" class="text-body-emphasis fw-bold">Continue reading...</a></p>
     </div>
 </div>
-
-
 <!-- Карусель с изображениями -->
 <!-- <div id="carouselExampleCaptions" class="carousel slide" data-bs-ride="carousel">
             <div class="carousel-inner">
