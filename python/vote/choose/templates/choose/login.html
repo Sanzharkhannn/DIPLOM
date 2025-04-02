@@ -1,30 +1,105 @@
 {% extends "choose/index.html" %}
 
-{% block title %}Login{% endblock %}
+{% block title %}Вход{% endblock %}
 
 {% block content %}
-
-
-<div class="container-fluid w-25">
-    <h1 class="mt-5 text-center">Вход</h1>
-    {% if error %}
-    <p style="color: red;">{{ error }}</p>
-    {% endif %}
-
-    <div clas="col">
-        <form method="post" class="p-4 border rounded shadow">
+<div class="container d-flex justify-content-center align-items-center min-vh-100">
+    <div class="card shadow-lg p-5 rounded-4 text-white" style="max-width: 420px; width: 100%; background: rgba(30, 30, 46, 0.95); animation: fadeIn 1s ease-in-out;">
+        <div class="text-center mb-3">
+            <h2 class="fw-bold">Вход</h2>
+            <p class="text-light">Введите свои данные, чтобы продолжить</p>
+        </div>
+        <form method="post" autocomplete="off">
             {% csrf_token %}
-            <div class="row justify-content-around">
-                <div class="row align-self-center">
-                    <label class="py-2">Имя пользователя:</label>
-                    <input type="text" name="username" required><br>
-                    <label class="py-2">Пароль:</label>
-                    <input type="password" name="password" required><br>
+            
+            {% if form.errors %}
+                <div class="alert alert-danger text-center py-2">
+                    Пожалуйста, исправьте ошибки в форме.
                 </div>
-                <br>
-                <button type="submit" class="mt-5 py-2 btn btn-success w-25">Войти</button>
+            {% endif %}
+            
+            <div class="mb-3">
+                <label class="form-label fw-semibold">Username</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-dark text-white"><i class="fas fa-user"></i></span>
+                    <input type="text" name="username" class="form-control" placeholder="Введите имя пользователя" required autocomplete="username">
+                </div>
             </div>
+            
+            <div class="mb-3">
+                <label class="form-label fw-semibold">Password</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-dark text-white"><i class="fas fa-lock"></i></span>
+                    <input type="password" name="password" class="form-control" placeholder="Введите пароль" required autocomplete="current-password">
+                </div>
+            </div>
+            
+            <div class="mb-3 d-flex justify-content-between align-items-center">
+                <div class="form-check">
+                    <input type="checkbox" class="form-check-input" id="rememberMe">
+                    <label class="form-check-label" for="rememberMe">Запомнить меня</label>
+                </div>
+                <a href="#" class="text-primary">Забыли пароль?</a>
+            </div>
+            
+            <button type="submit" class="btn btn-primary w-100 py-2">Войти</button>
         </form>
+        
+        <div class="text-center mt-3">
+            <p class="mb-2">Или войдите через</p>
+            <div class="d-flex justify-content-center gap-3">
+                <a href="#" class="btn btn-outline-light"><i class="fab fa-google"></i> Google</a>
+                <a href="#" class="btn btn-outline-light"><i class="fab fa-github"></i> GitHub</a>
+            </div>
+        </div>
+        
+        <div class="text-center mt-4">
+            <p class="mb-0">Нет аккаунта? <a href="/register" class="text-primary"><i class="fas fa-user-plus"></i> Зарегистрироваться</a></p>
+        </div>
     </div>
 </div>
+
+<style>
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(-20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    body {
+        background: linear-gradient(135deg, #1e1e2e, #282a36);
+        font-family: 'Poppins', sans-serif;
+        color: #fff;
+    }
+    .card {
+        background: rgba(30, 30, 46, 0.95);
+        border-radius: 16px;
+        box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.6);
+    }
+    .btn-primary {
+        background: #007bff;
+        border: none;
+        border-radius: 8px;
+        font-size: 16px;
+        transition: 0.3s ease;
+    }
+    .btn-primary:hover {
+        background: #0056b3;
+        box-shadow: 0 0 10px rgba(0, 123, 255, 0.5);
+    }
+    .form-control {
+        border: 1px solid #444;
+        border-radius: 8px;
+        padding: 10px;
+        width: 100%;
+        background: #252540;
+        color: #fff;
+    }
+    .form-control:focus {
+        border-color: #007bff;
+        outline: none;
+        box-shadow: 0 0 10px rgba(0, 123, 255, 0.5);
+    }
+</style>
+
+<!-- Подключение Font Awesome для иконок -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 {% endblock %}

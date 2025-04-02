@@ -3,37 +3,95 @@
 {% block title %}Регистрация{% endblock %}
 
 {% block content %}
-<div class="container mt-5 w-50">
-    <div class="row justify-content-center">
-        <div class="col-md-6">
-            <h1 class="text-center mb-4">Регистрация</h1>
-            <form method="post" class="p-4 border rounded shadow">
-                {% csrf_token %}
-                <!-- Вывод ошибок, если есть -->
-                {% if form.errors %}
-                    <div class="alert alert-danger">
-                        Пожалуйста, исправьте ошибки в форме.
-                    </div>
-                {% endif %}
-                
-                {{ form.non_field_errors }}
-                <!-- Поля формы -->
-                {% for field in form %}
-                    <div class="mb-3">
-                        {{ field.label_tag }}
-                        <br>
-                        {{ field }}
-                        {% if field.errors %}
-                            <div class="text-danger small">
-                                {{ field.errors }}
-                            </div>
+<div class="container d-flex justify-content-center align-items-center min-vh-100">
+    <div class="card shadow-lg p-5 rounded-4 text-white" style="max-width: 420px; width: 100%; background: rgba(30, 30, 46, 0.95); animation: fadeIn 1s ease-in-out;">
+        <div class="text-center mb-3">
+            <h2 class="fw-bold">Регистрация</h2>
+            <p class="text-light">Создайте аккаунт, чтобы продолжить</p>
+        </div>
+        <form method="post" autocomplete="off">
+            {% csrf_token %}
+            
+            {% if form.errors %}
+                <div class="alert alert-danger text-center py-2">
+                    Пожалуйста, исправьте ошибки в форме.
+                </div>
+            {% endif %}
+            
+            {{ form.non_field_errors }}
+            
+            {% for field in form %}
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">{{ field.label }}</label>
+                    <div class="input-group">
+                        {% if field.name == "username" or field.name == "email" %}
+                            <span class="input-group-text bg-dark text-white">
+                                {% if field.name == "username" %}<i class="fas fa-user"></i>{% endif %}
+                                {% if field.name == "email" %}<i class="fas fa-envelope"></i>{% endif %}
+                            </span>
                         {% endif %}
+                        <input type="{{ field.field.widget.input_type }}" name="{{ field.name }}" class="form-control" placeholder="{% if field.name == 'username' %}Введите имя пользователя{% elif field.name == 'email' %}Введите e-mail{% elif field.name == 'password1' %}Введите пароль{% elif field.name == 'password2' %}Повторите пароль{% else %}Введите {{ field.label | lower }}{% endif %}" required autocomplete="new-password">
                     </div>
-                {% endfor %}
-                
-                <button type="submit" class="btn btn-success w-100">Зарегистрироваться</button>
-            </form>
+                    {% if field.errors %}
+                        <div class="text-danger small mt-1">{{ field.errors }}</div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+            
+            <div class="mb-3 form-check">
+                <input type="checkbox" class="form-check-input" id="termsCheck">
+                <label class="form-check-label" for="termsCheck">Я согласен с <a href="#" class="text-primary">условиями использования</a></label>
+            </div>
+            
+            <button type="submit" class="btn btn-primary w-100 py-2">Зарегистрироваться</button>
+        </form>
+        <div class="text-center mt-4">
+            <p class="mb-0">Уже есть аккаунт? <a href="/login" class="text-primary"><i class="fas fa-sign-in-alt"></i> Войти</a></p>
         </div>
     </div>
 </div>
+
+<style>
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(-20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    body {
+        background: linear-gradient(135deg, #1e1e2e, #282a36);
+        font-family: 'Poppins', sans-serif;
+        color: #fff;
+    }
+    .card {
+        background: rgba(30, 30, 46, 0.95);
+        border-radius: 16px;
+        box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.6);
+    }
+    .btn-primary {
+        background: #007bff;
+        border: none;
+        border-radius: 8px;
+        font-size: 16px;
+        transition: 0.3s ease;
+    }
+    .btn-primary:hover {
+        background: #0056b3;
+        box-shadow: 0 0 10px rgba(0, 123, 255, 0.5);
+    }
+    .form-control {
+        border: 1px solid #444;
+        border-radius: 8px;
+        padding: 10px;
+        width: 100%;
+        background: #252540;
+        color: #fff;
+    }
+    .form-control:focus {
+        border-color: #007bff;
+        outline: none;
+        box-shadow: 0 0 10px rgba(0, 123, 255, 0.5);
+    }
+</style>
+
+<!-- Подключение Font Awesome для иконок -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 {% endblock %}
