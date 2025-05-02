@@ -5,13 +5,19 @@ from django.shortcuts import render, redirect, get_object_or_404  # type: ignore
 from .forms import CustomUserCreationForm, CreateContentForVote
 from django.contrib.auth import login as auth_login, authenticate, logout as auth_logout  # type: ignore
 from django.contrib.auth.decorators import login_required  # type: ignore
-from .models import Content, Vote,  ContentOption, ContentOptionVote
+from .models import Content, Vote,  ContentOption, ContentOptionVote, EncryptedVote
 import matplotlib.pyplot as plt
 import matplotlib
 import io
 import base64
 from django.contrib import messages
 from django.utils import timezone
+from cryptography.hazmat.primitives.asymmetric import rsa
+from .crypto import encrypt_privkey
+from cryptography.hazmat.primitives import hashes
+from cryptography.hazmat.primitives.asymmetric import padding
+from cryptography.hazmat.primitives import serialization 
+
 # Create your views here.
 
 
@@ -285,16 +291,20 @@ def create_famous_vote(request):
 
 
 
+
+
 @login_required
 def create_poll(request):
     if request.method == 'POST':
+        # … ваш код по чтению vote_title, vote_description, dates и options …
         vote_title = request.POST.get('vote_title')
         vote_description = request.POST.get('vote_description')
         start_date = request.POST.get('start_date')
         end_date = request.POST.get('end_date')
         options = request.POST.getlist('vote_options')  # Получаем список всех вариантов
         
-        # Создаём запись Content
+
+        # 1) создаём запись Content без ключей
         content = Content.objects.create(
             user=request.user,
             title=vote_title,
@@ -303,15 +313,66 @@ def create_poll(request):
             end_date=end_date,
             created_at=timezone.now()
         )
-        
-        # Сохраняем варианты
+
+        # 2) сохраняем ваши варианты
         for option in options:
             if option.strip():
-                ContentOption.objects.create(content=content, option_text=option.strip())
-        
-        return redirect('choose:vote-list')  # Перенаправляем на страницу списка голосований
-    
+                ContentOption.objects.create(content=content,
+                                             option_text=option.strip())
+
+        # 3) генерируем RSA-ключи и сохраняем их в модель
+        priv = rsa.generate_private_key(public_exponent=65537, key_size=2048)
+        pub  = priv.public_key()
+
+        pub_pem = pub.public_bytes(
+            encoding=serialization.Encoding.PEM,
+            format=serialization.PublicFormat.SubjectPublicKeyInfo,
+        ).decode()
+
+        priv_pem = priv.private_bytes(
+            encoding=serialization.Encoding.PEM,
+            format=serialization.PrivateFormat.PKCS8,
+            encryption_algorithm=serialization.NoEncryption()
+        )
+        # шифруем приватный ключ мастер-ключом
+        enc_priv = encrypt_privkey(priv_pem)
+
+        # апдейтим content
+        content.public_key            = pub_pem
+        content.private_key_encrypted = enc_priv
+        content.save(update_fields=['public_key', 'private_key_encrypted'])
+
+        return redirect('choose:vote-list')
+
     return render(request, 'choose/create_poll.html')
+
+# @login_required
+# def create_poll(request):
+#     if request.method == 'POST':
+#         vote_title = request.POST.get('vote_title')
+#         vote_description = request.POST.get('vote_description')
+#         start_date = request.POST.get('start_date')
+#         end_date = request.POST.get('end_date')
+#         options = request.POST.getlist('vote_options')  # Получаем список всех вариантов
+        
+#         # Создаём запись Content
+#         content = Content.objects.create(
+#             user=request.user,
+#             title=vote_title,
+#             body=vote_description,
+#             start_date=start_date,
+#             end_date=end_date,
+#             created_at=timezone.now()
+#         )
+        
+#         # Сохраняем варианты
+#         for option in options:
+#             if option.strip():
+#                 ContentOption.objects.create(content=content, option_text=option.strip())
+        
+#         return redirect('choose:vote-list')  # Перенаправляем на страницу списка голосований
+    
+#     return render(request, 'choose/create_poll.html')
 
 
 def vote_list(request):
@@ -334,33 +395,70 @@ def vote_list(request):
 #     return render(request, 'choose/poll_detail.html', {'poll': poll})
 
 
+
+
 @login_required
 def poll_detail(request, poll_id):
-    poll = get_object_or_404(Content, id=poll_id)
+    poll    = get_object_or_404(Content, id=poll_id)
     options = ContentOption.objects.filter(content=poll)
-    
+
     if request.method == 'POST':
-        selected_option_id = request.POST.get('option')
-        if selected_option_id:
-            selected_option = ContentOption.objects.get(id=selected_option_id)
-
-            # Проверяем, голосовал ли пользователь ранее
-            existing_vote = ContentOptionVote.objects.filter(user=request.user, option__content_id=poll_id).first()
-            if existing_vote:
-                # Изменяем существующий голос
-                existing_vote.option = selected_option
-                existing_vote.save()
-                messages.success(request, "Ваш голос был обновлен!")
-            else:
-                # Если не голосовал ранее — создаём новый голос
-                ContentOptionVote.objects.create(user=request.user, option=selected_option)
-                messages.success(request, "Спасибо за ваш голос!")
-
-            return redirect('choose:poll_detail', poll_id=poll_id)
+        opt_id = request.POST.get('option')
+        if not opt_id:
+            messages.error(request, "Вы не выбрали вариант.")
         else:
-            messages.error(request, "Вы не выбрали вариант ответа.")
+            # 1) берём public_key из модели
+            pub = serialization.load_pem_public_key(
+                poll.public_key.encode()
+            )
+            # 2) шифруем идентификатор опции (или текст)
+            ct = pub.encrypt(
+                opt_id.encode(),    # можно также option_text.encode()
+                padding.OAEP(
+                   mgf=padding.MGF1(hashes.SHA256()),
+                   algorithm=hashes.SHA256(), label=None
+                )
+            )
+            b64 = base64.b64encode(ct).decode()
 
-    return render(request, 'choose/poll_detail.html', {'poll': poll, 'options': options})
+            # 3) сохраняем зашифрованный голос
+            EncryptedVote.objects.create(
+                content=poll,
+                encrypted_choice=b64
+            )
+            messages.success(request, "Спасибо! Ваш голос учтён.")
+            return redirect('choose:poll_detail', poll_id=poll_id)
+
+    return render(request, 'choose/poll_detail.html',
+                  {'poll': poll, 'options': options})
+
+# @login_required
+# def poll_detail(request, poll_id):
+#     poll = get_object_or_404(Content, id=poll_id)
+#     options = ContentOption.objects.filter(content=poll)
+    
+#     if request.method == 'POST':
+#         selected_option_id = request.POST.get('option')
+#         if selected_option_id:
+#             selected_option = ContentOption.objects.get(id=selected_option_id)
+
+#             # Проверяем, голосовал ли пользователь ранее
+#             existing_vote = ContentOptionVote.objects.filter(user=request.user, option__content_id=poll_id).first()
+#             if existing_vote:
+#                 # Изменяем существующий голос
+#                 existing_vote.option = selected_option
+#                 existing_vote.save()
+#                 messages.success(request, "Ваш голос был обновлен!")
+#             else:
+#                 # Если не голосовал ранее — создаём новый голос
+#                 ContentOptionVote.objects.create(user=request.user, option=selected_option)
+#                 messages.success(request, "Спасибо за ваш голос!")
+
+#             return redirect('choose:poll_detail', poll_id=poll_id)
+#         else:
+#             messages.error(request, "Вы не выбрали вариант ответа.")
+
+#     return render(request, 'choose/poll_detail.html', {'poll': poll, 'options': options})
 
 
 def polls_list(request):

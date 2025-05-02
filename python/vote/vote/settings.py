@@ -46,8 +46,11 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'choose.apps.ChooseConfig',
-    'django_model_info.apps.DjangoModelInfoConfig'
+    # 'choose.apps.ChooseConfig',
+    'choose',
+    'django_model_info.apps.DjangoModelInfoConfig',
+    # 'tally.apps.TallyConfig',
+    'tally'
 ]
 
 MIDDLEWARE = [
