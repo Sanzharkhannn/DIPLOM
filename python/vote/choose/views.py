@@ -11,7 +11,7 @@ import matplotlib
 import io
 import base64
 from django.contrib import messages
-from .models import Content
+from django.utils import timezone
 # Create your views here.
 
 
@@ -283,12 +283,6 @@ def create_profession_vote(request):
 def create_famous_vote(request):
     return render(request, 'choose/create_famous_vote.html')
 
-
-
-from django.shortcuts import render, redirect
-from django.contrib import messages
-from .models import Content, ContentOption
-from django.utils import timezone
 
 
 @login_required

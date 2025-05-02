@@ -9,7 +9,7 @@
         <form action="{% url 'choose:create-content' %}" method="post" class="needs-validation" novalidate>
             {% csrf_token %}
 
-            <div class="mb-3">
+            <!-- <div class="mb-3">
                 <label for="title" class="form-label">Название контента:</label>
                 <input type="text" class="form-control custom-input" id="title" name="title" required>
                 <div class="invalid-feedback">Пожалуйста, введите название.</div>
@@ -19,7 +19,7 @@
                 <label for="body" class="form-label">Описание контента:</label>
                 <input type="text" class="form-control custom-input" id="body" name="body" required>
                 <div class="invalid-feedback">Пожалуйста, введите описание.</div>
-            </div>
+            </div> -->
 
             <div class="mb-3">
                 <label for="exampleSelect" class="form-label">Выберите категорию:</label>
@@ -34,7 +34,7 @@
 
             <div id="extra-buttons" class="mt-3 text-center"></div>
 
-            <button type="submit" class="btn custom-button w-100 py-2" id="submitButton" disabled>Создать общий контент</button>
+            <!-- <button type="submit" class="btn custom-button w-100 py-2" id="submitButton" disabled>Создать общий контент</button> -->
         </form>
     </div>
 </section>

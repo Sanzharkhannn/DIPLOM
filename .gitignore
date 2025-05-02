@@ -1,1 +1,4 @@
 .venv/
+model_architecture.ps
+model_architecture.dot
+models.html

@@ -3,8 +3,6 @@ from .models import Content, Vote, ContentOptionVote, ContentOption, UserRSAKeys
 
 
 
-from .models import Content, Vote, UserRSAKeys, ContentOption, ContentOptionVote
-
 class ContentOptionInline(admin.TabularInline):
     model = ContentOption
     extra = 0
@@ -38,6 +36,7 @@ class ContentOptionAdmin(admin.ModelAdmin):
 class ContentOptionVoteAdmin(admin.ModelAdmin):
     list_display = ('user', 'option', 'voted_at')
     search_fields = ('user__username', 'option__option_text')
+    list_filter = ('option__content',)
 
 @admin.register(UserRSAKeys)
 class UserRSAKeysAdmin(admin.ModelAdmin):

@@ -29,7 +29,7 @@ class ContentOption(models.Model):
     def __str__(self):
         return f"Option: {self.option_text} (for {self.content.title})"
 
-# ✅ Голоса за варианты
+# Голоса за варианты
 class ContentOptionVote(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     option = models.ForeignKey(ContentOption, on_delete=models.CASCADE, related_name='votes')
@@ -42,7 +42,7 @@ class ContentOptionVote(models.Model):
         return f"{self.user.username} проголосовал за {self.option.option_text}"
 
 
-# ✅ Оставляем твой класс Vote для лайков/дизлайков
+# Оставляем твой класс Vote для лайков/дизлайков
 class Vote(models.Model):
     VOTE_TYPE_CHOICES = (
         ('up', 'Upvote'),
