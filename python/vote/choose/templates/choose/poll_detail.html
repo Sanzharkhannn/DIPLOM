@@ -4,17 +4,19 @@
     <h2>{{ poll.title }}</h2>
     <p>{{ poll.body }}</p>
 
-    <form method="post">
+    <form method="post" action="{% url 'choose:poll_detail' poll.id %}">
         {% csrf_token %}
         {% for option in poll.options.all %}
             <div class="form-check">
                 <input class="form-check-input" type="radio" name="option" id="option{{ option.id }}" value="{{ option.id }}" required>
                 <label class="form-check-label" for="option{{ option.id }}">
-                    {{ option.option_text }} ({{ option.votes.count }} голосов)
+                    {{ option.option_text }} 
+                    <!-- ({{ option.votes.count }} голосов) -->
                 </label>
             </div>
         {% endfor %}
         <button type="submit" class="btn btn-primary mt-3">Проголосовать</button>
     </form>
+    <a href="{% url 'choose:poll_results' poll.id %}" class="btn btn-secondary">Подсчет результатов</a>
 </div>
 {% endblock %}

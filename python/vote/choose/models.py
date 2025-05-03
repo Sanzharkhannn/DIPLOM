@@ -100,3 +100,21 @@ class UserRSAKeys(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     public_key = models.TextField()
     private_key_encrypted = models.TextField()  # Лучше хранить зашифрованным
+
+
+class PollResult(models.Model):
+    # связываем результат с опросом (Content)
+    content     = models.ForeignKey(
+                     Content,
+                     on_delete=models.CASCADE,
+                     related_name='results'
+                   )
+    # вариант ответа – сохраняем текст опции
+    option_text = models.CharField(max_length=200)
+    votes       = models.IntegerField(default=0)
+
+    class Meta:
+        unique_together = ('content', 'option_text')
+
+    def __str__(self):
+        return f"{self.content.title!r}: {self.option_text} → {self.votes}"

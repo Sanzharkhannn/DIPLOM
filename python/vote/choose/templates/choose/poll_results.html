@@ -1,0 +1,36 @@
+{% extends 'choose/index.html' %}
+{% block content %}
+  <h1>Результаты опроса: {{ poll.title }}</h1>
+  <p>{{ poll.body }}</p>
+  <!-- <table>
+    <thead>
+      <tr><th>Вариант</th><th>Голоса</th></tr>
+    </thead>
+    <tbody>
+      {% for r in results %}
+        <tr>
+          <td>{{ r.option_text }}</td>
+          <td>{{ r.votes }}</td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="2">Пока нет голосов</td></tr>
+      {% endfor %}
+    </tbody>
+  </table> -->
+  <table>
+    <thead>
+      <tr><th>Вариант</th><th>Голоса</th></tr>
+    </thead>
+    <tbody>
+      {% for option, votes in option_votes %}
+        <tr>
+          <td>{{ option.option_text }}</td>
+          <td>{{ votes }}</td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="2">Пока нет голосов</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  <a href="{% url 'choose:poll_detail' poll.id %}" class="btn btn-secondary">Перейти к голосованию</a>
+{% endblock %}

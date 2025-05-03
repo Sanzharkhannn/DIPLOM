@@ -6,8 +6,8 @@
     <ul class="list-group mt-3">
         {% for poll in polls %}
         <li class="list-group-item">
-            <h5>{{ poll.title }}</h5>
-            <p>{{ poll.body }}</p>
+            <h5>Названия: {{ poll.title }}</h5>
+            <p>Описания: {{ poll.body }}</p>
             <p>Автор: {{ poll.user.username }}</p>
             <p>Дата начала: {{ poll.start_date }} | Дата окончания: {{ poll.end_date }}</p>
             
@@ -15,8 +15,9 @@
             <ul>
                 {% for option in poll.options.all %}
                 <li>
-                    {{ option.option_text }} — 
-                    <strong>{{ option.votes.count }} голос(ов)</strong>
+                    {{ option.option_text }} 
+                    <!-- —  -->
+                    <!-- <strong>{{ option.votes.count }} голос(ов)</strong> -->
                 </li>
                 {% empty %}
                 <li>Нет вариантов.</li>

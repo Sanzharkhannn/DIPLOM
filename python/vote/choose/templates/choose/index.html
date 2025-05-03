@@ -132,7 +132,8 @@
                 <ul class="navbar-nav">
                     <!-- Категория "Создать" -->
                     <li class="nav-item"><a class="nav-link" href="{% url 'choose:index' %}">Главная</a></li>
-                    <li class="nav-item"><a class="nav-link" href="{% url 'choose:vote-list' %}">Все голосования</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{% url 'choose:vote-list' %}">Список созданных голосований</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{% url 'choose:vote-list' %}">Подсчет голосований</a></li>
                     
                     <!-- Меню пользователя -->
                     <li class="nav-item dropdown">
@@ -143,7 +144,7 @@
                         <ul class="dropdown-menu dropdown-menu-end">
                             {% if user.is_authenticated %}
                             <li><a class="dropdown-item" href="{% url 'choose:user-page' %}">Профиль</a></li>
-                            <li><a class="dropdown-item" href="{% url 'choose:vote-page' %}">Мои голоса</a></li>
+                            <li><a class="dropdown-item" href="{% url 'choose:vote-page' %}">Мои лайки</a></li>
                             <li><a class="dropdown-item" href="{% url 'choose:create-content' %}">Создать голосование</a></li>
                             <li><hr class="dropdown-divider"></li>
                             <li><a class="dropdown-item text-danger" href="{% url 'choose:user-logout' %}">Выход</a></li>

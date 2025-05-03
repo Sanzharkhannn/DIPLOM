@@ -5,7 +5,7 @@ from django.shortcuts import render, redirect, get_object_or_404  # type: ignore
 from .forms import CustomUserCreationForm, CreateContentForVote
 from django.contrib.auth import login as auth_login, authenticate, logout as auth_logout  # type: ignore
 from django.contrib.auth.decorators import login_required  # type: ignore
-from .models import Content, Vote,  ContentOption, ContentOptionVote, EncryptedVote
+from .models import Content, Vote,  ContentOption, ContentOptionVote, EncryptedVote, PollResult
 import matplotlib.pyplot as plt
 import matplotlib
 import io
@@ -17,6 +17,7 @@ from .crypto import encrypt_privkey
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.asymmetric import padding
 from cryptography.hazmat.primitives import serialization 
+
 
 # Create your views here.
 
@@ -427,7 +428,7 @@ def poll_detail(request, poll_id):
                 encrypted_choice=b64
             )
             messages.success(request, "Спасибо! Ваш голос учтён.")
-            return redirect('choose:poll_detail', poll_id=poll_id)
+            return redirect('choose:poll_results', poll_id=poll_id)
 
     return render(request, 'choose/poll_detail.html',
                   {'poll': poll, 'options': options})
@@ -464,3 +465,34 @@ def poll_detail(request, poll_id):
 def polls_list(request):
     polls = Content.objects.all()
     return render(request, 'choose/polls_list.html', {'polls': polls})
+
+
+
+
+# def poll_results(request, poll_id):
+#     poll    = get_object_or_404(Content, id=poll_id)
+#     # results = poll.results.all()   # благодаря related_name='results'
+#     results = poll.results.all().order_by('option_text')
+#     return render(request, 'choose/poll_results.html', {
+#         'poll': poll,
+#         'results': results
+#     })
+    
+def poll_results(request, poll_id):
+    poll    = get_object_or_404(Content, pk=poll_id)
+    # получаем варианты в том порядке, как они хранятся
+    options = poll.options.all()  
+    # готовим словарь: option_text → голосов
+    counts_qs = poll.results.all()     # здесь PollResult(option_text, votes)
+    counts = {r.option_text: r.votes for r in counts_qs}
+
+    # Собираем список кортежей (option, votes) в порядке options
+    option_votes = [
+        (opt, counts.get(opt.option_text, 0))
+        for opt in options
+    ]
+
+    return render(request, 'choose/poll_results.html', {
+        'poll': poll,
+        'option_votes': option_votes,
+    })
