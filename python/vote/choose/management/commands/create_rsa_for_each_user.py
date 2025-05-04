@@ -1,7 +1,8 @@
+# choose/management/commands/create_user_keys.py
 from django.core.management.base import BaseCommand
 from django.contrib.auth import get_user_model
 from choose.models import UserRSAKeys
-from Crypto.PublicKey import RSA # type: ignore
+from Crypto.PublicKey import RSA
 from choose.crypto import encrypt_privkey
 
 User = get_user_model()
@@ -11,24 +12,63 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         for user in User.objects.all():
-            if hasattr(user, 'userrsakeys'):
+            # проверяем, есть ли уже запись
+            if UserRSAKeys.objects.filter(user=user).exists():
                 self.stdout.write(f'Keys already exist for {user.username}')
                 continue
 
-            # генерируем пару
+            # генерируем пару 2048 бит
             key = RSA.generate(2048)
-            priv_pem = key.export_key().decode()
-            pub_pem  = key.publickey().export_key().decode()
 
-            # шифруем приватный ключ мастер-ключом
-            encrypted_priv = encrypt_privkey(priv_pem)
+            # экспортируем приватный и публичный ключи в PEM-формате (bytes)
+            priv_pem_bytes = key.export_key(format='PEM')
+            pub_pem_bytes  = key.publickey().export_key(format='PEM')
 
+            # шифруем приватный ключ мастер-ключом (строкой)
+            encrypted_priv = encrypt_privkey(priv_pem_bytes)
+
+            # сохраняем в БД, приводим bytes → str
             UserRSAKeys.objects.create(
                 user=user,
-                public_key=pub_pem,
+                public_key=pub_pem_bytes.decode('utf-8'),
                 private_key_encrypted=encrypted_priv
             )
-            self.stdout.write(self.style.SUCCESS(f'Created keys for {user.username}'))
+            self.stdout.write(self.style.SUCCESS(
+                f'Created keys for {user.username}'
+            ))
+
+# from django.core.management.base import BaseCommand
+# from django.contrib.auth import get_user_model
+# from choose.models import UserRSAKeys
+# from pycryptodome import RSA # type: ignore
+# from choose.crypto import encrypt_privkey
+
+# User = get_user_model()
+
+# class Command(BaseCommand):
+#     help = 'Генерирует RSA-ключи для всех существующих пользователей'
+
+#     def handle(self, *args, **options):
+#         for user in User.objects.all():
+#             if hasattr(user, 'userrsakeys'):
+#                 self.stdout.write(f'Keys already exist for {user.username}')
+#                 continue
+
+#             # генерируем пару
+#             key = RSA.generate(2048)
+#             priv_pem = key.export_key().decode()
+#             pub_pem  = key.publickey().export_key().decode()
+
+#             # шифруем приватный ключ мастер-ключом
+#             encrypted_priv = encrypt_privkey(priv_pem)
+
+#             UserRSAKeys.objects.create(
+#                 user=user,
+#                 public_key=pub_pem,
+#                 private_key_encrypted=encrypted_priv
+#             )
+#             self.stdout.write(self.style.SUCCESS(f'Created keys for {user.username}'))
+
 
 
 # from django.core.management.base import BaseCommand

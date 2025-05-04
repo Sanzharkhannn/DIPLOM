@@ -34,7 +34,7 @@ SECRET_KEY = 'django-insecure-8f150cu^^iqt#n*y4$np6ux6!g&2doskyla1h)yj7kgoj%sth*
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['developerchi.pythonanywhere.com']
 
 
 # Application definition
@@ -46,8 +46,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    # 'choose.apps.ChooseConfig',
-    'choose',
+    'choose.apps.ChooseConfig',
+    # 'choose',
     'django_model_info.apps.DjangoModelInfoConfig',
     # 'tally.apps.TallyConfig',
     'tally'
@@ -133,7 +133,11 @@ STATIC_URL = 'static/'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
+# STATIC_ROOT = "/home/DeveloperChi/DIPLOM/python/vote/static/"
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')  # для production (PythonAnywhere)
 
-
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'choose/static'),  # твоя директория со static
+]
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
