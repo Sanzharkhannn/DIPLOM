@@ -7,16 +7,27 @@
     <form method="post" action="{% url 'choose:poll_detail' poll.id %}">
         {% csrf_token %}
         {% for option in poll.options.all %}
-            <div class="form-check">
-                <input class="form-check-input" type="radio" name="option" id="option{{ option.id }}" value="{{ option.id }}" required>
-                <label class="form-check-label" for="option{{ option.id }}">
-                    {{ option.option_text }} 
-                    <!-- ({{ option.votes.count }} голосов) -->
-                </label>
-            </div>
+        <div class="form-check">
+            <input class="form-check-input" type="radio" name="option" id="option{{ option.id }}"
+                value="{{ option.id }}" required>
+            <label class="form-check-label" for="option{{ option.id }}">
+                {{ option.option_text }}
+                <!-- ({{ option.votes.count }} голосов) -->
+            </label>
+        </div>
         {% endfor %}
         <button type="submit" class="btn btn-primary mt-3">Проголосовать</button>
     </form>
     <a href="{% url 'choose:poll_results' poll.id %}" class="btn btn-secondary">Подсчет результатов</a>
+    {% if messages %}
+    <ul class="messages">
+        {% for message in messages %}
+        <li{% if message.tags %} class="{{ message.tags }}" {% endif %}>
+            {{ message }}
+            </li>
+            {% endfor %}
+    </ul>
+    {% endif %}
+
 </div>
 {% endblock %}

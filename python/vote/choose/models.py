@@ -64,19 +64,31 @@ class ContentOptionVote(models.Model):
     def __str__(self):
         return f"{self.user.username} проголосовал за {self.option.option_text}"
 
+# class EncryptedVote(models.Model):
+#     content          = models.ForeignKey(Content,
+#                          on_delete=models.CASCADE,
+#                          related_name='encrypted_votes')
+#     # здесь лежит base64(rsa_oaep(option_id)) или base64(rsa_oaep(option_text))
+#     encrypted_choice = models.TextField()
+#     voted_at         = models.DateTimeField(auto_now_add=True)
+
+#     def __str__(self):
+#         return f"EncryptedVote for poll #{self.content.id} at {self.voted_at}"
+
 class EncryptedVote(models.Model):
-    content          = models.ForeignKey(Content,
-                         on_delete=models.CASCADE,
-                         related_name='encrypted_votes')
-    # здесь лежит base64(rsa_oaep(option_id)) или base64(rsa_oaep(option_text))
+    content = models.ForeignKey(Content, on_delete=models.CASCADE, related_name='encrypted_votes')
     encrypted_choice = models.TextField()
-    voted_at         = models.DateTimeField(auto_now_add=True)
+    pvid = models.CharField(max_length=128, blank=True, null=True)  # ← добавляем поле
+    voted_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('content', 'pvid')  # ← один голос на pvid для одного content
 
     def __str__(self):
         return f"EncryptedVote for poll #{self.content.id} at {self.voted_at}"
 
 
-# Оставляем твой класс Vote для лайков/дизлайков
+# Оставляем класс Vote для лайков/дизлайков
 class Vote(models.Model):
     VOTE_TYPE_CHOICES = (
         ('up', 'Upvote'),

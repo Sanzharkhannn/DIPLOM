@@ -30,7 +30,7 @@ class ContentAdmin(admin.ModelAdmin):
 
 @admin.register(EncryptedVote)
 class EncryptedVoteAdmin(admin.ModelAdmin):
-    list_display = ('content', 'voted_at')
+    list_display = ('content', 'voted_at', 'pvid')
     list_filter = ('voted_at',)
     search_fields = ('content__title',)
     readonly_fields = ('encrypted_choice',)

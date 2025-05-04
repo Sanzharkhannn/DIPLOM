@@ -17,7 +17,7 @@ from .crypto import encrypt_privkey
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.asymmetric import padding
 from cryptography.hazmat.primitives import serialization 
-
+import hashlib
 
 # Create your views here.
 
@@ -400,38 +400,105 @@ def vote_list(request):
 
 @login_required
 def poll_detail(request, poll_id):
-    poll    = get_object_or_404(Content, id=poll_id)
+    poll = get_object_or_404(Content, id=poll_id)
     options = ContentOption.objects.filter(content=poll)
+
+    # создаём PVID (можно из user agent + IP + секретного ключа)
+    raw_data = request.META.get('HTTP_USER_AGENT', '') + request.META.get('REMOTE_ADDR', '')
+    pvid = hashlib.sha256(raw_data.encode()).hexdigest()
 
     if request.method == 'POST':
         opt_id = request.POST.get('option')
         if not opt_id:
             messages.error(request, "Вы не выбрали вариант.")
         else:
-            # 1) берём public_key из модели
-            pub = serialization.load_pem_public_key(
-                poll.public_key.encode()
-            )
-            # 2) шифруем идентификатор опции (или текст)
-            ct = pub.encrypt(
-                opt_id.encode(),    # можно также option_text.encode()
-                padding.OAEP(
-                   mgf=padding.MGF1(hashes.SHA256()),
-                   algorithm=hashes.SHA256(), label=None
+            # 1) Проверка: голосовал ли уже с этим pvid
+            existing = EncryptedVote.objects.filter(content=poll, pvid=pvid).first()
+            pubkey = serialization.load_pem_public_key(
+                    poll.public_key.encode()
                 )
-            )
-            b64 = base64.b64encode(ct).decode()
+            if existing:
+                # Если голос уже был, перезаписываем его
+            # Если голос уже был, перезаписываем его
+                ct = pubkey.encrypt(
+                    opt_id.encode(),  # шифруем новый выбор
+                    padding.OAEP(
+                        mgf=padding.MGF1(hashes.SHA256()),
+                        algorithm=hashes.SHA256(), label=None
+                    )
+                )
+                b64 = base64.b64encode(ct).decode()
+                existing.encrypted_choice = b64  # перезаписываем зашифрованный голос               
+                existing.save()
+                messages.success(request, "Ваш голос обновлён.")
+            else:
+                # 2) Если не голосовал ранее — шифруем новый голос
+                # Загружаем публичный ключ
 
-            # 3) сохраняем зашифрованный голос
-            EncryptedVote.objects.create(
-                content=poll,
-                encrypted_choice=b64
-            )
-            messages.success(request, "Спасибо! Ваш голос учтён.")
-            return redirect('choose:poll_results', poll_id=poll_id)
+                # Шифруем идентификатор опции (или текст)
+                ct = pubkey.encrypt(
+                    opt_id.encode(),  # можно также option_text.encode()
+                    padding.OAEP(
+                        mgf=padding.MGF1(hashes.SHA256()),
+                        algorithm=hashes.SHA256(),
+                        label=None
+                    )
+                )
 
-    return render(request, 'choose/poll_detail.html',
-                  {'poll': poll, 'options': options})
+                # Кодируем результат в base64 для хранения
+                b64 = base64.b64encode(ct).decode()
+
+                # 3) Создаём новый зашифрованный голос
+                EncryptedVote.objects.create(
+                    content=poll,
+                    encrypted_choice=b64,
+                    pvid=pvid  # добавляем pvid для анонимности
+                )
+                messages.success(request, "Спасибо! Ваш голос учтён.")
+                
+            return redirect('choose:poll_detail', poll_id=poll_id)
+
+    return render(request, 'choose/poll_detail.html', {
+        'poll': poll,
+        'options': options
+    })
+
+
+
+# @login_required
+# def poll_detail(request, poll_id):
+#     poll    = get_object_or_404(Content, id=poll_id)
+#     options = ContentOption.objects.filter(content=poll)
+
+#     if request.method == 'POST':
+#         opt_id = request.POST.get('option')
+#         if not opt_id:
+#             messages.error(request, "Вы не выбрали вариант.")
+#         else:
+#             # 1) берём public_key из модели
+#             pub = serialization.load_pem_public_key(
+#                 poll.public_key.encode()
+#             )
+#             # 2) шифруем идентификатор опции (или текст)
+#             ct = pub.encrypt(
+#                 opt_id.encode(),    # можно также option_text.encode()
+#                 padding.OAEP(
+#                    mgf=padding.MGF1(hashes.SHA256()),
+#                    algorithm=hashes.SHA256(), label=None
+#                 )
+#             )
+#             b64 = base64.b64encode(ct).decode()
+
+#             # 3) сохраняем зашифрованный голос
+#             EncryptedVote.objects.create(
+#                 content=poll,
+#                 encrypted_choice=b64
+#             )
+#             messages.success(request, "Спасибо! Ваш голос учтён.")
+#             return redirect('choose:poll_results', poll_id=poll_id)
+
+#     return render(request, 'choose/poll_detail.html',
+#                   {'poll': poll, 'options': options})
 
 # @login_required
 # def poll_detail(request, poll_id):
