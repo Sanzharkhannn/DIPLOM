@@ -5,7 +5,7 @@ from django.shortcuts import render, redirect, get_object_or_404  # type: ignore
 from .forms import CustomUserCreationForm, CreateContentForVote
 from django.contrib.auth import login as auth_login, authenticate, logout as auth_logout  # type: ignore
 from django.contrib.auth.decorators import login_required  # type: ignore
-from .models import Content, Vote,  ContentOption, ContentOptionVote, EncryptedVote, PollResult
+from .models import Content, Vote,  ContentOption, ContentOptionVote, EncryptedVote, PollResult, EmailConfirmation
 import matplotlib.pyplot as plt
 import matplotlib
 import io
@@ -18,7 +18,10 @@ from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.asymmetric import padding
 from cryptography.hazmat.primitives import serialization 
 import hashlib
-
+from django.contrib import messages
+from django.core.mail import send_mail
+from django.conf import settings
+from django.contrib.auth.models import User
 # Create your views here.
 
 
@@ -26,7 +29,25 @@ import hashlib
 def index(request):
     return render(request, "choose/index.html")
 
-# Функция регистрации
+# # Функция регистрации
+# def user_register(request):
+#     if request.user.is_authenticated:
+#         messages.info(request, "Вы уже вошли в систему.")
+#         return redirect('choose:user-page')
+
+#     if request.method == "POST":
+#         form = CustomUserCreationForm(request.POST)
+#         if form.is_valid():
+#             user = form.save()  # Создаём пользователя
+#             # Автоматически логиним после регистрации
+#             auth_login(request, user)
+#             # Перенаправляем на главную страницу
+#             return redirect("choose:index")
+#     else:
+#         form = CustomUserCreationForm()  # Пустая форма для отображения
+#     return render(request, "choose/register.html", {"form": form})
+
+
 def user_register(request):
     if request.user.is_authenticated:
         messages.info(request, "Вы уже вошли в систему.")
@@ -35,14 +56,49 @@ def user_register(request):
     if request.method == "POST":
         form = CustomUserCreationForm(request.POST)
         if form.is_valid():
-            user = form.save()  # Создаём пользователя
-            # Автоматически логиним после регистрации
-            auth_login(request, user)
-            # Перенаправляем на главную страницу
-            return redirect("choose:index")
+            user = form.save(commit=False)
+            user.is_active = False  # Пользователь неактивен, пока не подтвердит email
+            user.save()
+
+            # Создаём объект подтверждения
+            confirmation = EmailConfirmation.objects.create(user=user)
+            confirmation.generate_code()
+
+            # Отправляем email с кодом
+            send_mail(
+                'Код подтверждения регистрации',
+                f'Ваш код подтверждения: {confirmation.code}',
+                settings.DEFAULT_FROM_EMAIL,
+                [user.email],
+                fail_silently=False,
+            )
+
+            messages.success(request, "Регистрация прошла успешно. Проверьте почту и введите код.")
+            return redirect("verify_code", user_id=user.id)
     else:
-        form = CustomUserCreationForm()  # Пустая форма для отображения
+        form = CustomUserCreationForm()
     return render(request, "choose/register.html", {"form": form})
+
+
+def verify_code(request, user_id):
+    user = get_object_or_404(User, pk=user_id)
+    if request.method == "POST":
+        input_code = request.POST.get("code")
+        try:
+            confirmation = EmailConfirmation.objects.get(user=user)
+            if confirmation.code == input_code:
+                user.is_active = True
+                user.save()
+                confirmation.delete()
+                messages.success(request, "Email подтверждён. Можете войти.")
+                return redirect("login")  # Или автологин, если хочешь
+            else:
+                messages.error(request, "Неверный код.")
+        except EmailConfirmation.DoesNotExist:
+            messages.error(request, "Ошибка подтверждения.")
+    return render(request, "choose/verify_code.html", {"user_id": user.id})
+
+
 
 
 # Функция логина

@@ -2,6 +2,8 @@ from django.db import models  # type: ignore
 from django.contrib.auth.models import User  # type: ignore
 from django.contrib.auth.forms import UserCreationForm  # type: ignore
 from django import forms  # type: ignore
+import random
+import string
 
 
 class RegistrationForm(UserCreationForm):
@@ -130,3 +132,15 @@ class PollResult(models.Model):
 
     def __str__(self):
         return f"{self.content.title!r}: {self.option_text} → {self.votes}"
+    
+
+
+
+class EmailConfirmation(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    code = models.CharField(max_length=6)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def generate_code(self):
+        self.code = ''.join(random.choices(string.digits, k=6))
+        self.save()

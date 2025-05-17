@@ -27,4 +27,6 @@ urlpatterns = [
     path('polls/', views.polls_list, name='polls_list'),
     path('polls/<int:poll_id>/', views.poll_detail, name='poll_detail'),
     path('poll/<int:poll_id>/results/', views.poll_results, name='poll_results'),
+    path("verify/<int:user_id>/", views.verify_code, name="verify_code"),
+
 ]

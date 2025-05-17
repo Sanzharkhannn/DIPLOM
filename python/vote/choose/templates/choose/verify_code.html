@@ -1,0 +1,13 @@
+{% extends 'choose/index.html' %}
+
+{% block content %}
+
+<form method="post">
+    {% csrf_token %}
+    <label>Введите код, отправленный на вашу почту:</label><br>
+    <input type="text" name="code" required><br>
+    <button type="submit">Подтвердить</button>
+  </form>
+
+  
+{% endblock %}
